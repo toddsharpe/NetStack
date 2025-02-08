@@ -45,13 +45,13 @@ namespace Net::IPv4
 		packet.dst = { ip_hdr.dst, 0 };
 
 		//Forward packet if needed
-		const bool is_match = net_if.config.ip.addr == packet.dst.addr;
-		const bool is_joined = net_if.config.ip.is_joined(packet.dst.addr);
+		const bool is_match = net_if.ipv4.addr == packet.dst.addr;
+		const bool is_joined = net_if.ipv4.is_joined(packet.dst.addr);
 		const bool is_multicast = Net::is_multicast(packet.dst.addr);
 		const bool accept = is_multicast ? is_joined : is_match;
 		if (is_multicast)
 		{
-			for (const ipv4_mc_route_t& route : net_if.config.ip.mc_routes)
+			for (const ipv4_mc_route_t& route : net_if.ipv4.mc_routes)
 			{
 				if (route.group != packet.dst.addr)
 					continue;
@@ -60,7 +60,7 @@ namespace Net::IPv4
 				Forward(packet, *route.dst);
 			}
 		}
-		else if (!is_match && net_if.config.ip.ip_forwarding)
+		else if (!is_match && net_if.ipv4.ip_forwarding)
 		{
 			//Attempt to forward
 			const size_t if_idx = Router::Resolve(packet.dst);
@@ -89,7 +89,6 @@ namespace Net::IPv4
 		else
 		{
 			//Drop
-			//net_if.driver->RxFree(packet);
 			packet.release();
 		}
 	}

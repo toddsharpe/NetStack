@@ -26,6 +26,10 @@ namespace Net
 		void Receive(NetIf& net_if, Packet& packet);
 		bool Send(NetIf& net_if, Packet& packet);
 
-		typedef eth_mac_t addr_t;
+		struct config_t
+		{
+			eth_mac_t addr;
+			std::array<eth_mac_t, 4> filters;
+		};
 	}
 }

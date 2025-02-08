@@ -80,8 +80,8 @@ void Test_IPv4()
 	};
 
 	NetIf net_if(driver, { Receive, Send }, "Test", test_bindings);
-	net_if.config.ip.addr = Net::localhost;
-	net_if.config.ip.subnet_mask = Net::subnet_32;
+	net_if.ipv4.addr = Net::localhost;
+	net_if.ipv4.subnet_mask = Net::subnet_32;
 
 	/*
 	 * Receive icmp.
@@ -100,7 +100,7 @@ void Test_IPv4()
 	 * Receive udp.
 	 */
 	{
-		net_if.config.ip.addr = Net::build_ip(63, 116, 8, 77);
+		net_if.ipv4.addr = Net::build_ip(63, 116, 8, 77);
 		
 		Packet packet;
 		CopyTo(packet, rx_udp);

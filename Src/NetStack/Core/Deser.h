@@ -13,26 +13,46 @@ public:
 	}
 
 	template <typename T>
-	T read()
+	T read() = delete;
+
+	template <>
+	uint8_t read<uint8_t>()
 	{
-		constexpr size_t size = sizeof(T);
-		static_assert(size >= 0 && size < 8);
-		
+		constexpr size_t size = sizeof(uint8_t);
 		_ASSERT(offset <= length - size);
-			
-		uint8_t temp[size] = {};
-		memcpy(temp, &buffer[offset], size);
+
+		uint8_t ret = buffer[offset];
+		offset++;
+
+		return ret;
+	}
+
+	template <>
+	uint16_t read<uint16_t>()
+	{
+		constexpr size_t size = sizeof(uint16_t);
+		_ASSERT(offset <= length - size);
+
+		uint16_t temp = {};
+		memcpy(&temp, &buffer[offset], size);
 		offset += size;
+		temp = _byteswap_ushort(temp);
 
-		//Endian swap
-		for (size_t i = 0; i < size / 2; i++)
-		{
-			uint8_t swap = temp[i];
-			temp[i] = temp[size - i - 1];
-			temp[size - i - 1] = swap;
-		}
+		return temp;
+	}
 
-		return *(T*)temp;
+	template <>
+	uint32_t read<uint32_t>()
+	{
+		constexpr size_t size = sizeof(uint32_t);
+		_ASSERT(offset <= length - size);
+
+		uint32_t temp = {};
+		memcpy(&temp, &buffer[offset], size);
+		offset += size;
+		temp = _byteswap_ulong(temp);
+
+		return temp;
 	}
 
 	template <size_t N>
@@ -69,23 +89,38 @@ public:
 	}
 
 	template <typename T>
-	void write(T value)
+	void write(const T value) = delete;
+
+	template <>
+	void write<uint8_t>(const uint8_t value)
 	{
-		_ASSERT(offset <= length - sizeof(T));
+		constexpr size_t size = sizeof(uint8_t);
+		_ASSERT(offset <= length - size);
 
-		uint8_t temp[sizeof(T)] = {};
-		memcpy(temp, &value, sizeof(T));
+		buffer[offset] = value;
+		offset += size;
+	}
 
-		//Endian swap
-		for (size_t i = 0; i < sizeof(T) / 2; i++)
-		{
-			uint8_t swap = temp[i];
-			temp[i] = temp[sizeof(T) - i - 1];
-			temp[sizeof(T) - i - 1] = swap;
-		}
+	template <>
+	void write<uint16_t>(const uint16_t value)
+	{
+		constexpr size_t size = sizeof(uint16_t);
+		_ASSERT(offset <= length - size);
 
-		memcpy(&buffer[offset], temp, sizeof(T));
-		offset += sizeof(T);
+		uint16_t* dst = reinterpret_cast<uint16_t*>(&buffer[offset]);
+		*dst = _byteswap_ushort(value);
+		offset += size;
+	}
+
+	template <>
+	void write<uint32_t>(const uint32_t value)
+	{
+		constexpr size_t size = sizeof(uint32_t);
+		_ASSERT(offset <= length - size);
+
+		uint32_t* dst = reinterpret_cast<uint32_t*>(&buffer[offset]);
+		*dst = _byteswap_ulong(value);
+		offset += size;
 	}
 
 	void write_from(const void* const from, const size_t bytes)

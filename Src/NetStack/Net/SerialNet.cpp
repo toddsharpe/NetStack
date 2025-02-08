@@ -35,7 +35,7 @@ namespace Net::SerialNet
 			//rebroadcast to all
 			_ASSERT(false);
 		}
-		else if (hdr.dst == net_if.config.serial_addr)
+		else if (hdr.dst == net_if.serial.addr)
 		{
 			//Idle frame
 			if (packet.count == sizeof(serial_hdr_t))
@@ -58,7 +58,7 @@ namespace Net::SerialNet
 		const serial_hdr_t hdr =
 		{
 			.dst = arp(packet.dst.addr),
-			.src = net_if.config.serial_addr,
+			.src = net_if.serial.addr,
 			.length = static_cast<uint16_t>(packet.length()),
 			.crc = 0xAABB
 		};
