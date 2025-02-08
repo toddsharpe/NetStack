@@ -7,7 +7,7 @@ namespace Net
 {
 	namespace SerialNet
 	{
-		constexpr uint8_t serial_broadcast = 0xFF;
+		constexpr uint8_t broadcast = 0xFF;
 
 		struct serial_hdr_t
 		{
@@ -22,6 +22,18 @@ namespace Net
 		bool Send(NetIf& net_if, Packet& packet);
 
 		typedef uint8_t addr_t;
+
+		struct config_t
+		{
+			config_t() : addr(), filters(), is_slave()
+			{
+
+			}
+			
+			uint8_t addr;
+			std::array<uint8_t, 4> filters;
+			bool is_slave;
+		};
 	}
 
 	const NetLayer SerialNetLayer = { SerialNet::Receive, SerialNet::Send, sizeof(SerialNet::serial_hdr_t) };

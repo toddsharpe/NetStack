@@ -2,7 +2,8 @@
 #include "Net/Udp.h"
 #include "Net/Icmp.h"
 #include "Net/Socket.h"
-#include "Core/Deser.h"
+#include "Core/Deserializer.h"
+#include "Core/Serializer.h"
 #include "Net/NetIf.h"
 #include "Net/Router.h"
 
@@ -24,7 +25,7 @@ namespace Net::IPv4
 	{
 		_ASSERT(packet.length() >= sizeof(ipv4_hdr_t));
 
-		Deser deser(packet.buffer(), packet.length());
+		Deserializer deser(packet.buffer(), packet.length());
 		const ipv4_hdr_t ip_hdr =
 		{
 			.ihl_version = deser.read<uint8_t>(),
@@ -45,13 +46,14 @@ namespace Net::IPv4
 		packet.dst = { ip_hdr.dst, 0 };
 
 		//Forward packet if needed
-		const bool is_match = net_if.config.ip.addr == packet.dst.addr;
-		const bool is_joined = net_if.config.ip.is_joined(packet.dst.addr);
+		const bool is_broadcast = packet.dst.addr == Net::broadcast;
+		const bool is_match = net_if.ipv4.addr == packet.dst.addr;
+		const bool is_joined = net_if.ipv4.is_joined(packet.dst.addr);
 		const bool is_multicast = Net::is_multicast(packet.dst.addr);
-		const bool accept = is_multicast ? is_joined : is_match;
+		const bool accept = is_multicast ? is_joined : (is_match || is_broadcast);
 		if (is_multicast)
 		{
-			for (const ipv4_mc_route_t& route : net_if.config.ip.mc_routes)
+			for (const ipv4_mc_route_t& route : net_if.ipv4.mc_routes)
 			{
 				if (route.group != packet.dst.addr)
 					continue;
@@ -60,13 +62,13 @@ namespace Net::IPv4
 				Forward(packet, *route.dst);
 			}
 		}
-		else if (!is_match && net_if.config.ip.ip_forwarding)
+		else if (!is_match && net_if.ipv4.ip_forwarding)
 		{
 			//Attempt to forward
 			const size_t if_idx = Router::Resolve(packet.dst);
 			NetIf& target_if = Router::GetInterface(if_idx);
-
-			Forward(packet, target_if);
+			if (&target_if != &net_if)
+				Forward(packet, target_if);
 		}
 		
 		if (accept)
@@ -89,7 +91,6 @@ namespace Net::IPv4
 		else
 		{
 			//Drop
-			//net_if.driver->RxFree(packet);
 			packet.release();
 		}
 	}
@@ -113,7 +114,10 @@ namespace Net::IPv4
 			.dst = packet.dst.addr,
 		};
 
-		Ser ser(packet.buffer(), packet.length());
+		//TODO(tsharpe): Enable ip checksum
+		const uint16_t checksum = Net::checksum(&hdr, sizeof(hdr));
+
+		Serializer ser(packet.buffer(), packet.length());
 		ser.write(hdr.ihl_version);
 		ser.write(hdr.dscp);
 		ser.write(hdr.length);

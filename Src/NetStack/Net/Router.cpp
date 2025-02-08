@@ -34,8 +34,12 @@ namespace Net::Router
 			if (!if_entries[i].in_use)
 				continue;
 
-			const bool is_network = Net::is_network(dst.addr, if_entries[i].net_if->config.ip.addr, if_entries[i].net_if->config.ip.subnet_mask);
+			const bool is_network = Net::is_network(dst.addr, if_entries[i].net_if->ipv4.addr, if_entries[i].net_if->ipv4.subnet_mask);
 			if (is_network)
+				return i;
+
+			const bool is_joined = if_entries[i].net_if->ipv4.is_joined(dst.addr);
+			if (is_joined)
 				return i;
 		}
 

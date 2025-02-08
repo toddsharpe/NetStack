@@ -13,12 +13,12 @@ namespace Net
 	public:
 		UartMac(FakeDma& _dma);
 
-		virtual void RxPoll(NetIf& net_if);
-		virtual bool TxSend(Packet& packet);
-		virtual void TxFlush();
+		void RxPoll(NetIf& net_if) override;
+		bool TxSend(Packet& packet) override;
+		void TxFlush() override;
 
-		virtual Packet* RxAlloc();
-		virtual Packet* TxAlloc();
+		Packet* RxAlloc() override;
+		Packet* TxAlloc() override;
 
 	private:
 		void rx_callback(const size_t size);

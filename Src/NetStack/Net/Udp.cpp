@@ -1,13 +1,14 @@
 #include "Net/Udp.h"
 #include "Net/Socket.h"
 #include "Net/NetIf.h"
-#include "Core/Deser.h"
+#include "Core/Deserializer.h"
+#include "Core/Serializer.h"
 
 namespace Net::Udp
 {
 	void Receive(NetIf& net_if, Packet& packet)
 	{
-		Deser deser(packet.buffer(), packet.length());
+		Deserializer deser(packet.buffer(), packet.length());
 		const udp_hdr_t udp_hdr =
 		{
 			.src_port = deser.read<uint16_t>(),
@@ -39,7 +40,7 @@ namespace Net::Udp
 			.checksum = 0x00
 		};
 
-		Ser ser(packet.buffer(), packet.length());
+		Serializer ser(packet.buffer(), packet.length());
 		ser.write(hdr.src_port);
 		ser.write(hdr.dst_port);
 		ser.write(hdr.length);
