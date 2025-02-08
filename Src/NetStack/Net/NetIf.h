@@ -50,7 +50,9 @@ namespace Net
 			, udp(UdpLayer)
 			, icmp(IcmpLayer)
 			, socket(SocketLayer)
-			, config()
+			, ipv4()
+			, serial()
+			, ethernet()
 			, name(_name)
 		{
 
@@ -63,7 +65,9 @@ namespace Net
 			, udp(bindings.udp)
 			, icmp(bindings.icmp)
 			, socket(bindings.socket)
-			, config()
+			, ipv4()
+			, serial()
+			, ethernet()
 			, name(_name)
 		{
 
@@ -76,17 +80,9 @@ namespace Net
 		const NetLayer& icmp;
 		const NetLayer& socket;
 
-		struct config_t
-		{
-			config_t() : ip(), serial_addr(), eth_addr()
-			{
-
-			}
-			
-			ipv4_data_t ip;
-			SerialNet::addr_t serial_addr;
-			Ethernet::addr_t eth_addr;
-		} config;
+		ipv4_data_t ipv4;
+		SerialNet::config_t serial;
+		Ethernet::config_t ethernet;
 
 		std::string name;
 	};

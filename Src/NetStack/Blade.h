@@ -18,7 +18,6 @@ public:
 	void VerifyPeerA(const uint8_t* const buffer, const size_t length, const size_t skip);
 	void VerifyPeerB(const uint8_t* const buffer, const size_t length, const size_t skip);
 
-private:
 	void PreDispatch();
 	void PostDispatch();
 

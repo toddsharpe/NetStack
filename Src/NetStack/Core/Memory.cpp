@@ -20,7 +20,7 @@ bool mem_cmp(const void* const buffer1, const void* const buffer2, const size_t 
 		if (left == right)
 			continue;
 
-		printf("0x%lX:    0x%02X, 0x%02X\n", i, left, right);
+		printf("0x%llX:    0x%02X, 0x%02X\n", i, left, right);
 	}
 
 	return false;

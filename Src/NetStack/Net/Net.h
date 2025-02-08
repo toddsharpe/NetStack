@@ -32,6 +32,7 @@ namespace Net
 	constexpr ipv4_addr_t localhost = build_ip(127, 0, 0, 1);
 	constexpr ipv4_addr_t server_ip = build_ip(192, 168, 0, 0);
 	constexpr ipv4_addr_t telem_ip = build_ip(239, 9, 9, 9);
+	constexpr ipv4_addr_t broadcast = build_ip(0xFF, 0xFF, 0xFF, 0xFF);
 
 	constexpr ipv4_addr_t subnet_24 = build_ip(0xFF, 0xFF, 0xFF, 0);
 	constexpr ipv4_addr_t subnet_32 = build_ip(0xFF, 0xFF, 0xFF, 0xFF);

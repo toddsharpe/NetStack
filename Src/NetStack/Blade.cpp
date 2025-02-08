@@ -16,11 +16,11 @@ void Blade::Init()
 
 	//Initialize upstream
 	upstream.Set(1, Net::build_ip(10, 248, 0, 1), Net::subnet_24);
-	upstream.config.ip.mc_groups =
+	upstream.ipv4.mc_groups =
 	{
 		Net::build_ip(224, 0, 0, 251)
 	};
-	upstream.config.ip.mc_routes =
+	upstream.ipv4.mc_routes =
 	{ {
 		{ Net::build_ip(224, 0, 0, 251), &peer_a },
 		{ Net::build_ip(224, 0, 0, 251), &peer_b }

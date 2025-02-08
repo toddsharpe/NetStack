@@ -21,6 +21,8 @@
   <ItemGroup>
     <ClCompile Include="Blade.cpp" />
     <ClCompile Include="Core\Memory.cpp" />
+    <ClCompile Include="Net\Dhcp.cpp" />
+    <ClCompile Include="Net\DhcpClient.cpp" />
     <ClCompile Include="Net\Net.cpp" />
     <ClCompile Include="Net\Router.cpp" />
     <ClCompile Include="Net\Socket.cpp" />
@@ -39,11 +41,14 @@
     <ClInclude Include="Blade.h" />
     <ClInclude Include="Board.h" />
     <ClInclude Include="Core\CircularBuffer.h" />
+    <ClInclude Include="Core\Deserializer.h" />
     <ClInclude Include="Core\Memory.h" />
+    <ClInclude Include="Core\Serializer.h" />
+    <ClInclude Include="Net\Dhcp.h" />
+    <ClInclude Include="Net\DhcpClient.h" />
     <ClInclude Include="Net\Icmp.h" />
     <ClInclude Include="Net\IPv4.h" />
     <ClInclude Include="Net\Ethernet.h" />
-    <ClInclude Include="Core\Deser.h" />
     <ClInclude Include="Net\Net.h" />
     <ClInclude Include="Net\NetIf.h" />
     <ClInclude Include="Net\NetTypes.h" />

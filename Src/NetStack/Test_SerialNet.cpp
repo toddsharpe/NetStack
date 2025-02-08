@@ -53,7 +53,7 @@ void Test_SerialNet()
 	};
 
 	NetIf net_if(driver, NetLayer(), "Test", test_bindings);
-	net_if.config.serial_addr = 0x01;
+	net_if.serial.addr = 0x01;
 
 	/*
 	 * Receive idle.

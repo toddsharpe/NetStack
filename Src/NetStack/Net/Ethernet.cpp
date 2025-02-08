@@ -1,13 +1,30 @@
 #include "Net/Ethernet.h"
 #include "Net/IPv4.h"
 #include "Net/NetIf.h"
-#include "Core/Deser.h"
+#include "Core/Deserializer.h"
 
 namespace Net::Ethernet
 {
+	static bool Accept(NetIf& net_if, const eth_mac_t& dst)
+	{
+		if (Ethernet::broadcast == dst)
+			return true;
+		
+		if (net_if.ethernet.addr == dst)
+			return true;
+
+		for (eth_mac_t& filter : net_if.ethernet.filters)
+		{
+			if (filter == dst)
+				return true;
+		}
+
+		return false;
+	}
+	
 	void Receive(NetIf& net_if, Packet& packet)
 	{
-		Deser deser(packet.buffer(), packet.length());
+		Deserializer deser(packet.buffer(), packet.length());
 		eth_mac_t dst = {};
 		deser.read(dst.bytes);
 		eth_mac_t src = {};
@@ -21,18 +38,25 @@ namespace Net::Ethernet
 		};
 		packet.offset += sizeof(eth_hdr_t);
 
-		switch (hdr.type)
+		if (Accept(net_if, hdr.dst))
 		{
-			case eth_type_ipv4:
-				net_if.ip.Receive(net_if, packet);
-				break;
+			switch (hdr.type)
+			{
+				case eth_type_ipv4:
+					net_if.ip.Receive(net_if, packet);
+					break;
 
-			case eth_type_arp:
-				_ASSERT(false);
-				break;
+				case eth_type_arp:
+					_ASSERT(false);
+					break;
 
-			default:
-				_ASSERT(false);
+				default:
+					_ASSERT(false);
+			}
+		}
+		else
+		{
+			packet.release();
 		}
 	}
 
