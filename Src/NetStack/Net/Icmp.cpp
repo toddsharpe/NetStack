@@ -1,6 +1,7 @@
 #include "Net/Icmp.h"
 #include "Net/NetIf.h"
-#include "Core/Deser.h"
+#include "Core/Deserializer.h"
+#include "Core/Serializer.h"
 
 namespace Net::Icmp
 {
@@ -10,7 +11,7 @@ namespace Net::Icmp
 		{
 			_ASSERT(packet.length() >= sizeof(echo_hdr_t));
 			
-			Deser deser(packet.buffer(), packet.length());
+			Deserializer deser(packet.buffer(), packet.length());
 			const echo_hdr_t hdr =
 			{
 				.id = deser.read<uint16_t>(),
@@ -29,7 +30,7 @@ namespace Net::Icmp
 		{
 			_ASSERT(packet.length() >= sizeof(echo_hdr_t));
 			
-			Deser deser(packet.buffer(), packet.length());
+			Deserializer deser(packet.buffer(), packet.length());
 			const echo_hdr_t hdr =
 			{
 				.id = deser.read<uint16_t>(),
@@ -46,7 +47,7 @@ namespace Net::Icmp
 			tx_packet->src = packet.dst;
 
 			//Reflect id, seq num, and payload
-			Ser ser(tx_packet->buffer(), tx_packet->length());
+			Serializer ser(tx_packet->buffer(), tx_packet->length());
 			ser.write(hdr.id);
 			ser.write(hdr.seq_num);
 			ser.write_from(deser.peek(), deser.remaining());
@@ -64,7 +65,7 @@ namespace Net::Icmp
 	{
 		_ASSERT(packet.length() >= sizeof(icmp_hdr_t));
 		
-		Deser deser(packet.buffer(), packet.length());
+		Deserializer deser(packet.buffer(), packet.length());
 		const icmp_hdr_t hdr =
 		{
 			.type = deser.read<uint8_t>(),
@@ -106,7 +107,7 @@ namespace Net::Icmp
 			.checksum = 0
 		};
 
-		Ser ser(packet.buffer(), packet.length());
+		Serializer ser(packet.buffer(), packet.length());
 		ser.write(hdr.type);
 		ser.write(hdr.code);
 

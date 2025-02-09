@@ -13,7 +13,18 @@ namespace Net
 		struct eth_mac_t
 		{
 			uint8_t bytes[6];
+
+			bool operator==(const eth_mac_t& other) const
+			{
+				return memcmp(bytes, other.bytes, sizeof(eth_mac_t::bytes)) == 0;
+			}
+
+			bool operator!=(const eth_mac_t& other) const
+			{
+				return !(*this == other);
+			}
 		};
+		static constexpr eth_mac_t broadcast = { .bytes = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF} };
 
 		struct eth_hdr_t
 		{
@@ -28,6 +39,11 @@ namespace Net
 
 		struct config_t
 		{
+			config_t() : addr(), filters()
+			{
+
+			}
+			
 			eth_mac_t addr;
 			std::array<eth_mac_t, 4> filters;
 		};

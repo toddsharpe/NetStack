@@ -2,7 +2,8 @@
 #include "Net/Udp.h"
 #include "Net/Icmp.h"
 #include "Net/Socket.h"
-#include "Core/Deser.h"
+#include "Core/Deserializer.h"
+#include "Core/Serializer.h"
 #include "Net/NetIf.h"
 #include "Net/Router.h"
 
@@ -24,7 +25,7 @@ namespace Net::IPv4
 	{
 		_ASSERT(packet.length() >= sizeof(ipv4_hdr_t));
 
-		Deser deser(packet.buffer(), packet.length());
+		Deserializer deser(packet.buffer(), packet.length());
 		const ipv4_hdr_t ip_hdr =
 		{
 			.ihl_version = deser.read<uint8_t>(),
@@ -112,7 +113,10 @@ namespace Net::IPv4
 			.dst = packet.dst.addr,
 		};
 
-		Ser ser(packet.buffer(), packet.length());
+		//TODO(tsharpe): Enable ip checksum
+		const uint16_t checksum = Net::checksum(&hdr, sizeof(hdr));
+
+		Serializer ser(packet.buffer(), packet.length());
 		ser.write(hdr.ihl_version);
 		ser.write(hdr.dscp);
 		ser.write(hdr.length);

@@ -1,25 +1,40 @@
 #include "Net/SerialNet.h"
 #include "Net/IPv4.h"
 #include "Net/NetIf.h"
-#include "Core/Deser.h"
+#include "Core/Deserializer.h"
+#include "Core/Serializer.h"
 
 namespace Net::SerialNet
 {
-	namespace
+	static const uint8_t arp(const ipv4_addr_t ip, const bool is_slave)
 	{
-		constexpr uint8_t arp(const ipv4_addr_t ip)
+		if (ip == Net::broadcast || Net::is_multicast(ip))
+			return is_slave ? 0 : SerialNet::broadcast;
+		return static_cast<uint8_t>(ip.addr);
+	}
+
+	static bool Accept(NetIf& net_if, const uint8_t& dst)
+	{
+		if (SerialNet::broadcast == dst)
+			return true;
+
+		if (net_if.serial.addr == dst)
+			return true;
+
+		for (uint8_t& filter : net_if.serial.filters)
 		{
-			if (Net::is_multicast(ip))
-				return SerialNet::serial_broadcast;
-			return static_cast<uint8_t>(ip.addr);
+			if (filter == dst)
+				return true;
 		}
+
+		return false;
 	}
 	
 	void Receive(NetIf& net_if, Packet& packet)
 	{
 		_ASSERT(packet.length() >= sizeof(serial_hdr_t));
 
-		Deser deser(packet.buffer(), packet.length());
+		Deserializer deser(packet.buffer(), packet.length());
 		const serial_hdr_t hdr =
 		{
 			.dst = deser.read<uint8_t>(),
@@ -30,12 +45,7 @@ namespace Net::SerialNet
 		packet.offset += sizeof(serial_hdr_t);
 		_ASSERT(hdr.length == packet.count);
 
-		if (hdr.dst == serial_broadcast)
-		{
-			//rebroadcast to all
-			_ASSERT(false);
-		}
-		else if (hdr.dst == net_if.serial.addr)
+		if (Accept(net_if, hdr.dst))
 		{
 			//Idle frame
 			if (packet.count == sizeof(serial_hdr_t))
@@ -46,7 +56,6 @@ namespace Net::SerialNet
 		}
 		else
 		{
-			//net_if.driver->RxFree(packet);
 			packet.release();
 		}
 	}
@@ -57,14 +66,14 @@ namespace Net::SerialNet
 		
 		const serial_hdr_t hdr =
 		{
-			.dst = arp(packet.dst.addr),
+			.dst = arp(packet.dst.addr, net_if.serial.is_slave),
 			.src = net_if.serial.addr,
 			.length = static_cast<uint16_t>(packet.length()),
 			.crc = 0xAABB
 		};
 
 		//Write header
-		Ser ser(packet.buffer(), packet.length());
+		Serializer ser(packet.buffer(), packet.length());
 		ser.write(hdr.dst);
 		ser.write(hdr.src);
 		ser.write(hdr.length);

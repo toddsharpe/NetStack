@@ -46,6 +46,7 @@ struct SerialInterface : Net::NetIf
 	void Set(const uint8_t board_id, const Net::ipv4_addr_t board_ip, const Net::ipv4_addr_t subnet)
 	{
 		serial.addr = board_id;
+		serial.is_slave = true;
 		ipv4.addr = board_ip;
 		ipv4.subnet_mask = subnet;
 	}
