@@ -64,7 +64,13 @@ public:
 		offset += N;
 	}
 
-	const void* const peek() const
+	void skip(const size_t size)
+	{
+		_ASSERT(offset <= length - size);
+		offset += size;
+	}
+
+	const uint8_t* const peek() const
 	{
 		return &buffer[offset];
 	}

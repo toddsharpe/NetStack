@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClCompile Include="Blade.cpp" />
     <ClCompile Include="Core\Memory.cpp" />
+    <ClCompile Include="Net\Dhcp.cpp" />
     <ClCompile Include="Net\DhcpClient.cpp" />
     <ClCompile Include="Net\Net.cpp" />
     <ClCompile Include="Net\Router.cpp" />

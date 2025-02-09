@@ -46,10 +46,11 @@ namespace Net::IPv4
 		packet.dst = { ip_hdr.dst, 0 };
 
 		//Forward packet if needed
+		const bool is_broadcast = packet.dst.addr == Net::broadcast;
 		const bool is_match = net_if.ipv4.addr == packet.dst.addr;
 		const bool is_joined = net_if.ipv4.is_joined(packet.dst.addr);
 		const bool is_multicast = Net::is_multicast(packet.dst.addr);
-		const bool accept = is_multicast ? is_joined : is_match;
+		const bool accept = is_multicast ? is_joined : (is_match || is_broadcast);
 		if (is_multicast)
 		{
 			for (const ipv4_mc_route_t& route : net_if.ipv4.mc_routes)
@@ -66,8 +67,8 @@ namespace Net::IPv4
 			//Attempt to forward
 			const size_t if_idx = Router::Resolve(packet.dst);
 			NetIf& target_if = Router::GetInterface(if_idx);
-
-			Forward(packet, target_if);
+			if (&target_if != &net_if)
+				Forward(packet, target_if);
 		}
 		
 		if (accept)

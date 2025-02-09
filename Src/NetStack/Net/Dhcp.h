@@ -14,11 +14,12 @@ namespace Net
 		static constexpr uint8_t opcode_request = 1;
 		static constexpr uint8_t opcode_response = 2;
 
+		static constexpr uint8_t options_subnet = 1;
 		static constexpr uint8_t options_router = 3;
 		static constexpr uint8_t options_dns = 6;
 		static constexpr uint8_t options_requested_ip = 50;
 		static constexpr uint8_t options_message_type = 53;
-		static constexpr uint8_t options_dhcp_server = 51;
+		static constexpr uint8_t options_dhcp_server = 54;
 		static constexpr uint8_t options_param_req_list = 55;
 		static constexpr uint8_t options_end = 255;
 
@@ -52,5 +53,7 @@ namespace Net
 			uint8_t file[128];
 			uint32_t magic_cookie;
 		};
+
+		void GetOption(const uint8_t* const options, const size_t options_length, const uint8_t code, void* const dst, const size_t length);
 	}
 }

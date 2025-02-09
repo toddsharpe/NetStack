@@ -128,12 +128,48 @@ namespace Net
 
 	void DhcpClient::discover_offer_wait()
 	{
-		Dhcp::dhcp_hdr_t response = {};
+		uint8_t buffer[sizeof(Dhcp::dhcp_hdr_t) + options_resv] = {};
 		Net::endpoint_t src = {};
 		size_t bytes_read = 0;
-		const bool received = Socket::ReadUdp({ Net::broadcast, Dhcp::client_port }, src, &response, sizeof(response), bytes_read);
+		const bool received = Socket::ReadUdp({ Net::broadcast, Dhcp::client_port }, src, buffer, sizeof(buffer), bytes_read);
 		if (!received)
 			return;
 
+		Deserializer deser(buffer, sizeof(buffer));
+		Dhcp::dhcp_hdr_t hdr =
+		{
+			.opcode = deser.read<uint8_t>(),
+			.hardware_type = deser.read<uint8_t>(),
+			.haddr_length = deser.read<uint8_t>(),
+			.hops = deser.read<uint8_t>(),
+			.transaction_id = deser.read<uint32_t>(),
+			.seconds = deser.read<uint16_t>(),
+			.flags = deser.read<uint16_t>(),
+			.client_addr = {.addr = deser.read<uint32_t>() },
+			.your_addr = {.addr = deser.read<uint32_t>() },
+			.server_addr = {.addr = deser.read<uint32_t>() },
+			.gateway_addr = {.addr = deser.read<uint32_t>() },
+		};
+		deser.read(hdr.client_haddr);
+		deser.read(hdr.server_name);
+		deser.read(hdr.file);
+		hdr.magic_cookie = deser.read<uint32_t>();
+
+		_ASSERT(hdr.magic_cookie == Dhcp::magic_cookie);
+
+		uint8_t msg_type;
+		Dhcp::GetOption(deser.peek(), deser.remaining(), Dhcp::options_message_type, &msg_type, sizeof(msg_type));
+
+		Net::ipv4_addr_t router = {};
+		Dhcp::GetOption(deser.peek(), deser.remaining(), Dhcp::options_router, router.bytes, sizeof(router));
+
+		Net::ipv4_addr_t dns = {};
+		Dhcp::GetOption(deser.peek(), deser.remaining(), Dhcp::options_dns, dns.bytes, sizeof(dns));
+
+		Net::ipv4_addr_t server = {};
+		Dhcp::GetOption(deser.peek(), deser.remaining(), Dhcp::options_dhcp_server, server.bytes, sizeof(server));
+
+		Net::ipv4_addr_t subnet = {};
+		Dhcp::GetOption(deser.peek(), deser.remaining(), Dhcp::options_subnet, subnet.bytes, sizeof(subnet));
 	}
 }

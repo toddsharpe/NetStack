@@ -59,7 +59,7 @@ namespace Net::Socket
 				return false;
 
 			src = entry.packet->src;
-			memcpy(buffer, entry.packet->data, length);
+			memcpy(buffer, entry.packet->buffer(), entry.packet->length());
 			
 			entry.release();
 			return true;
