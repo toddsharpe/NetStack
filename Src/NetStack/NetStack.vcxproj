@@ -36,6 +36,7 @@
     <ClCompile Include="Net\Udp.cpp" />
     <ClCompile Include="Test_Net.cpp" />
     <ClCompile Include="Test_SerialNet.cpp" />
+    <ClCompile Include="WinEth.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Blade.h" />
@@ -61,6 +62,9 @@
     <ClInclude Include="Test\FakeDma.h" />
     <ClInclude Include="Test\NullMac.h" />
     <ClInclude Include="Test\Tests.h" />
+    <ClInclude Include="WinEth.h" />
+    <ClInclude Include="WinMac.h" />
+    <ClInclude Include="WinNetIf.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>

@@ -3,6 +3,7 @@
 #include "Blade.h"
 #include "Net/Socket.h"
 #include "Net/DhcpClient.h"
+#include <WinNetIf.h>
 
 /*
  * Run tests.
@@ -132,13 +133,8 @@ static constexpr uint8_t dhcp_offer[] =
 };
 
 static Blade blade;
-int main(int argc, char** argv)
+void blade_test()
 {
-	/*
-	 * Always test.
-	 */
-	test();
-
 	/*
 	 * Init.
 	 */
@@ -208,6 +204,26 @@ int main(int argc, char** argv)
 	blade.WriteUpstream(dhcp_offer, sizeof(dhcp_offer));
 	blade.Dispatch();
 	client.Dispatch();
+}
+
+static WinNetIf host_if("Host");
+int main(int argc, char** argv)
+{
+	/*
+	 * Always test.
+	 */
+	test();
+	//blade_test();
+
+	host_if.Init();
+	host_if.PreDispatch();
+	host_if.PostDispatch();
+
+	Net::DhcpClient client;
+	host_if.PreDispatch();
+	client.Start();
+	client.Dispatch();
+	host_if.PostDispatch();
 
 	/*
 	 * Return.
