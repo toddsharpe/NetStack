@@ -9,30 +9,6 @@
 
 namespace Net
 {
-	struct ipv4_data_t
-	{
-		ipv4_data_t() : mc_groups(), mc_routes(), addr(), subnet_mask(Net::subnet_32), ip_forwarding(true)
-		{
-
-		}
-
-		bool is_joined(const ipv4_addr_t mc_group) const
-		{
-			for (const ipv4_addr_t& addr : mc_groups)
-			{
-				if (addr == mc_group)
-					return true;
-			}
-			return false;
-		}
-		
-		std::array<ipv4_addr_t, 4> mc_groups;
-		std::array<IPv4::ipv4_mc_route_t, 4> mc_routes;
-		ipv4_addr_t addr;
-		ipv4_addr_t subnet_mask;
-		bool ip_forwarding;
-	};
-	
 	struct NetBindings
 	{
 		NetLayer ip;
@@ -80,9 +56,9 @@ namespace Net
 		const NetLayer& icmp;
 		const NetLayer& socket;
 
-		ipv4_data_t ipv4;
-		SerialNet::config_t serial;
-		Ethernet::config_t ethernet;
+		IPv4::data_t ipv4;
+		SerialNet::data_t serial;
+		Ethernet::data_t ethernet;
 
 		std::string name;
 	};

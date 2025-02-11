@@ -23,7 +23,12 @@ namespace Net::IPv4
 	
 	void Receive(NetIf& net_if, Packet& packet)
 	{
-		_ASSERT(packet.length() >= sizeof(ipv4_hdr_t));
+		if (packet.length() < sizeof(ipv4_hdr_t))
+		{
+			net_if.ipv4.rx_dropped++;
+			packet.release();
+			return;
+		}
 
 		Deserializer deser(packet.buffer(), packet.length());
 		const ipv4_hdr_t ip_hdr =
@@ -41,9 +46,12 @@ namespace Net::IPv4
 		};
 		packet.offset += sizeof(ipv4_hdr_t);
 
+		//TODO(tsharpe): Checksum
+
 		//Populate packet values
 		packet.src = { ip_hdr.src, 0 };
 		packet.dst = { ip_hdr.dst, 0 };
+		packet.proto = Protocol::Ipv4;
 
 		//Forward packet if needed
 		const bool is_broadcast = packet.dst.addr == Net::broadcast;
@@ -51,6 +59,15 @@ namespace Net::IPv4
 		const bool is_joined = net_if.ipv4.is_joined(packet.dst.addr);
 		const bool is_multicast = Net::is_multicast(packet.dst.addr);
 		const bool accept = is_multicast ? is_joined : (is_match || is_broadcast);
+
+		//Update stats
+		if (is_broadcast)
+			net_if.ipv4.rx_broadcast++;
+		else if (is_multicast)
+			net_if.ipv4.rx_multicast++;
+		else
+			net_if.ipv4.rx_unicast++;
+
 		if (is_multicast)
 		{
 			for (const ipv4_mc_route_t& route : net_if.ipv4.mc_routes)
@@ -73,6 +90,7 @@ namespace Net::IPv4
 		
 		if (accept)
 		{
+			net_if.ipv4.rx_accepted++;
 			switch (ip_hdr.proto)
 			{
 				case ip_proto_icmp:

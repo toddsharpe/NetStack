@@ -23,16 +23,27 @@ namespace Net
 
 		typedef uint8_t addr_t;
 
-		struct config_t
+		struct data_t
 		{
-			config_t() : addr(), filters(), is_slave()
+			data_t() : addr(), filters(), is_slave(), rx_dropped(), rx_accepted(), rx_unicast(), rx_broadcast()
 			{
 
 			}
 			
+			/*
+			 * Config.
+			 */
 			uint8_t addr;
 			std::array<uint8_t, 4> filters;
 			bool is_slave;
+
+			/*
+			 * Stats.
+			 */
+			uint32_t rx_dropped;
+			uint32_t rx_accepted;
+			uint32_t rx_unicast;
+			uint32_t rx_broadcast;
 		};
 	}
 

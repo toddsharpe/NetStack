@@ -32,7 +32,12 @@ namespace Net::SerialNet
 	
 	void Receive(NetIf& net_if, Packet& packet)
 	{
-		_ASSERT(packet.length() >= sizeof(serial_hdr_t));
+		if (packet.length() < sizeof(serial_hdr_t))
+		{
+			net_if.serial.rx_dropped++;
+			packet.release();
+			return;
+		}
 
 		Deserializer deser(packet.buffer(), packet.length());
 		const serial_hdr_t hdr =
@@ -43,15 +48,24 @@ namespace Net::SerialNet
 			.crc = deser.read<uint16_t>(),
 		};
 		packet.offset += sizeof(serial_hdr_t);
-		_ASSERT(hdr.length == packet.count);
+		
+		if (hdr.length != packet.count)
+		{
+			net_if.serial.rx_dropped++;
+			packet.release();
+			return;
+		}
 
 		if (Accept(net_if, hdr.dst))
 		{
+			net_if.serial.rx_accepted++;
+			
 			//Idle frame
 			if (packet.count == sizeof(serial_hdr_t))
 				return;
 
 			//TODO(tsharpe): Speak when spoken to
+			packet.proto = Protocol::Eth;
 			net_if.ip.Receive(net_if, packet);
 		}
 		else
