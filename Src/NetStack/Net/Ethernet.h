@@ -37,9 +37,9 @@ namespace Net
 		void Receive(NetIf& net_if, Packet& packet);
 		bool Send(NetIf& net_if, Packet& packet);
 
-		struct config_t
+		struct data_t
 		{
-			config_t() : addr(), filters()
+			data_t() : addr(), filters()
 			{
 
 			}

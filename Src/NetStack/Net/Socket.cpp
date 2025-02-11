@@ -28,6 +28,11 @@ namespace
 	{
 		return net_if.eth.HeaderSize + net_if.ip.HeaderSize + net_if.udp.HeaderSize;
 	}
+
+	size_t icmp_header_size(Net::NetIf& net_if)
+	{
+		return net_if.eth.HeaderSize + net_if.ip.HeaderSize + net_if.icmp.HeaderSize;
+	}
 }
 
 namespace Net::Socket
@@ -91,5 +96,60 @@ namespace Net::Socket
 		packet->src.port = src_port != 0 ? src_port : (rand() % UINT16_MAX);
 
 		return net_if.udp.Send(net_if, *packet);
+	}
+
+	bool SendTo(const endpoint_t dst, const uint16_t src_port, const void* const buffer, const size_t length, Protocol proto)
+	{
+		const size_t if_idx = Router::Resolve(dst);
+		NetIf& net_if = Router::GetInterface(if_idx);
+
+		//Get packet from driver
+		Packet* packet = net_if.driver.TxAlloc();
+		if (!packet)
+			return false;
+
+		size_t offset = 0;
+		switch (proto)
+		{
+			case Protocol::Udp:
+				offset = udp_header_size(net_if);
+				break;
+
+			case Protocol::Icmp:
+				offset = icmp_header_size(net_if);
+				break;
+
+			default:
+				_ASSERT(false);
+				return false;
+		}
+
+		//Write data to packet
+		memcpy(&packet->data[offset], buffer, length);
+		packet->count = offset + length;
+		packet->offset = offset;
+
+		switch (proto)
+		{
+			case Protocol::Udp:
+			{
+				//Populate packet fields
+				packet->dst = dst;
+				packet->src.port = src_port != 0 ? src_port : (rand() % UINT16_MAX);
+
+				return net_if.udp.Send(net_if, *packet);
+			}
+			break;
+
+			case Protocol::Icmp:
+			{
+				return net_if.icmp.Send(net_if, *packet);
+			}
+			break;
+
+			default:
+				_ASSERT(false);
+				return false;
+		}
 	}
 }

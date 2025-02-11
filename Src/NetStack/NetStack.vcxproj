@@ -40,6 +40,7 @@
   <ItemGroup>
     <ClInclude Include="Blade.h" />
     <ClInclude Include="Board.h" />
+    <ClInclude Include="Core\array_util.h" />
     <ClInclude Include="Core\CircularBuffer.h" />
     <ClInclude Include="Core\Deserializer.h" />
     <ClInclude Include="Core\Memory.h" />

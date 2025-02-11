@@ -11,8 +11,12 @@ namespace Net
 	enum class Protocol
 	{
 		None,
+		Eth,
+		Ipv4,
 		Udp,
 		Icmp,
+		EchoReply,
+		EchoRequest
 	};
 	
 	struct Packet
@@ -51,7 +55,7 @@ namespace Net
 		size_t count;
 		size_t offset;
 		
-		//Decoded data
+		//Layer specific data
 		endpoint_t src;
 		endpoint_t dst;
 		Protocol proto;

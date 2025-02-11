@@ -137,5 +137,8 @@
     <ClInclude Include="Core\Serializer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Core\array_util.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

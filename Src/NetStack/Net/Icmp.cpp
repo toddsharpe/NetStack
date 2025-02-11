@@ -5,11 +5,34 @@
 
 namespace Net::Icmp
 {
+	namespace
+	{
+		static uint8_t GetType(const Protocol proto)
+		{
+			switch (proto)
+			{
+				case Protocol::EchoReply:
+					return icmp_type_echo_reply;
+
+				case Protocol::EchoRequest:
+					return icmp_type_echo_request;
+
+				default:
+					_ASSERT(false);
+					return 0;
+			}
+		}
+	}
+	
 	namespace EchoReply
 	{
 		static void Receive(NetIf& net_if, Packet& packet)
 		{
-			_ASSERT(packet.length() >= sizeof(echo_hdr_t));
+			if (packet.length() < sizeof(echo_hdr_t))
+			{
+				packet.release();
+				return;
+			}
 			
 			Deserializer deser(packet.buffer(), packet.length());
 			const echo_hdr_t hdr =
@@ -18,6 +41,7 @@ namespace Net::Icmp
 				.seq_num = deser.read<uint16_t>(),
 			};
 			packet.offset += sizeof(echo_hdr_t);
+			packet.proto = Protocol::EchoReply;
 
 			//TODO: reply
 			_ASSERT(false);
@@ -28,7 +52,11 @@ namespace Net::Icmp
 	{
 		static void Receive(NetIf& net_if, Packet& packet)
 		{
-			_ASSERT(packet.length() >= sizeof(echo_hdr_t));
+			if (packet.length() < sizeof(echo_hdr_t))
+			{
+				packet.release();
+				return;
+			}
 			
 			Deserializer deser(packet.buffer(), packet.length());
 			const echo_hdr_t hdr =
@@ -37,6 +65,7 @@ namespace Net::Icmp
 				.seq_num = deser.read<uint16_t>(),
 			};
 			packet.offset += sizeof(echo_hdr_t);
+			packet.proto = Protocol::EchoRequest;
 
 			//Allocate packet to send
 			Packet* tx_packet = net_if.driver.TxAlloc();
@@ -53,17 +82,22 @@ namespace Net::Icmp
 			ser.write_from(deser.peek(), deser.remaining());
 			tx_packet->count = ser.bytes() + tx_packet->offset;
 
-			//Release packet
+			//Release received packet
 			packet.release();
 
 			//Send response
+			tx_packet->proto = Protocol::EchoReply;
 			net_if.icmp.Send(net_if, *tx_packet);
 		}
 	}
 	
 	void Receive(NetIf& net_if, Packet& packet)
 	{
-		_ASSERT(packet.length() >= sizeof(icmp_hdr_t));
+		if (packet.length() < sizeof(icmp_hdr_t))
+		{
+			packet.release();
+			return;
+		}
 		
 		Deserializer deser(packet.buffer(), packet.length());
 		const icmp_hdr_t hdr =
@@ -85,7 +119,7 @@ namespace Net::Icmp
 				_ASSERT(false);
 				break;
 
-			case icmp_type_echo_requests:
+			case icmp_type_echo_request:
 				EchoRequest::Receive(net_if, packet);
 				break;
 
@@ -97,12 +131,17 @@ namespace Net::Icmp
 
 	bool Send(NetIf& net_if, Packet& packet)
 	{
-		_ASSERT(packet.offset >= sizeof(icmp_hdr_t));
+		if (packet.offset < sizeof(icmp_hdr_t))
+		{
+			packet.release();
+			return false;
+		}
+
 		packet.offset -= sizeof(icmp_hdr_t);
 
 		const icmp_hdr_t hdr =
 		{
-			.type = icmp_type_echo_reply,
+			.type = GetType(packet.proto),
 			.code = 0,
 			.checksum = 0
 		};

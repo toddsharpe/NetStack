@@ -27,7 +27,8 @@ void Blade::Init()
 	} };
 
 	//Initialize peer a
-	peer_a.Set(0, Net::build_ip(192, 168, 0, 56), Net::subnet_24);
+	peer_a.Set(0, Net::build_ip(10, 248, 0, 0), Net::subnet_24);
+	Net::Router::AddRoute(peer_a, Net::build_ip(192, 168, 0, 56), Net::subnet_32);
 }
 
 void Blade::Dispatch()

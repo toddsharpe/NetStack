@@ -9,7 +9,7 @@ namespace Net
 	{
 		static constexpr uint8_t icmp_type_echo_reply = 0x00;
 		static constexpr uint8_t icmp_type_dest_unreachable = 0x03;
-		static constexpr uint8_t icmp_type_echo_requests = 0x08;
+		static constexpr uint8_t icmp_type_echo_request = 0x08;
 
 		struct icmp_hdr_t
 		{

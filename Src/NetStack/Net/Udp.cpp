@@ -8,6 +8,7 @@ namespace Net::Udp
 {
 	void Receive(NetIf& net_if, Packet& packet)
 	{
+		_ASSERT(packet.length() >= sizeof(udp_hdr_t));
 		Deserializer deser(packet.buffer(), packet.length());
 		const udp_hdr_t udp_hdr =
 		{

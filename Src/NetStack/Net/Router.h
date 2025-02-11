@@ -11,6 +11,6 @@ namespace Net
 		NetIf& GetInterface(const size_t if_idx);
 		
 		bool AddInterface(NetIf& net_if);
-		bool AddRoute(NetIf& net_if, const ipv4_addr_t dst);
+		bool AddRoute(NetIf& net_if, const ipv4_addr_t dst, const ipv4_addr_t subnet_mask);
 	}
 }
