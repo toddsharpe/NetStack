@@ -29,6 +29,7 @@ namespace Net
 		return { .bytes = {a3, a2, a1, a0} };
 	}
 
+	constexpr ipv4_addr_t empty = build_ip(0, 0, 0, 0);
 	constexpr ipv4_addr_t localhost = build_ip(127, 0, 0, 1);
 	constexpr ipv4_addr_t server_ip = build_ip(192, 168, 0, 0);
 	constexpr ipv4_addr_t telem_ip = build_ip(239, 9, 9, 9);

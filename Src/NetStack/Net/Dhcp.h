@@ -3,6 +3,7 @@
 #include "Net/Net.h"
 #include "Net/Packet.h"
 #include "Net/NetTypes.h"
+#include "Core/Deserializer.h"
 #include <cstdint>
 
 namespace Net
@@ -53,6 +54,20 @@ namespace Net
 			uint8_t file[128];
 			uint32_t magic_cookie;
 		};
+
+		template <typename T>
+		inline T GetOption(const uint8_t* const options, const size_t options_length, const uint8_t code)
+		{
+			for (size_t i = 0; i < options_length - 1; i++)
+			{
+				if (options[i] != code || options[i + 1] != sizeof(T))
+					continue;
+
+				Deserializer deser(&options[i + 2], sizeof(T));
+				return deser.read<T>();
+			}
+			return 0;
+		}
 
 		void GetOption(const uint8_t* const options, const size_t options_length, const uint8_t code, void* const dst, const size_t length);
 	}
