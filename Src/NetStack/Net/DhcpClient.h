@@ -25,15 +25,22 @@ namespace Net
 			discover,
 			offer_wait,
 			request,
-			request_wait
+			ack_wait,
+			finished
 		};
 
-		state_t get_next_state();
+		state_t get_next_state() const;
 		void dispatch_state();
 
 		void dispatch_discover();
-		void discover_offer_wait();
+		void dispatch_offer_wait();
+		void dispatch_request();
+		void dispatch_ack_wait();
 
 		state_t current_state;
+
+		//dhcp info
+		ipv4_addr_t your_ip;
+		ipv4_addr_t server_ip;
 	};
 }
